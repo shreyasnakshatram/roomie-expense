@@ -1,0 +1,81 @@
+import streamlit as st
+
+from datetime import datetime
+from db.helpers import add_expense_to_db, bulk_add_expense_to_db, get_all_user_names
+
+from utils.enums import ExpenseSource
+from utils.expense_helpers import parse_expense_from_image
+
+# ---------- CONFIG ----------
+ROOMMATES, users_dict = get_all_user_names()
+
+months = [datetime(1900, m, 1).strftime("%B") for m in range(1, 13)]
+current_year = datetime.now().year
+years = list(range(current_year, current_year + 50))
+
+# ---------- UI ----------
+st.title("🏠 Roommates — Add Expense")
+
+expense_parser = st.selectbox("Option for Expense", [ExpenseSource.MANUAL_EXPENSE.value, ExpenseSource.IMAGE_UPLOAD.value])
+
+expenses = []
+
+if expense_parser == ExpenseSource.MANUAL_EXPENSE.value:
+    # Manual Expense Form
+    with st.form("manual_expense_form", clear_on_submit=True):
+        col1, col2 = st.columns([3, 2])
+        with col1:
+            source = st.text_input("Expense source (e.g., Chicken, Instamart, Maid)", placeholder="e.g. Instamart")
+        with col2:
+            amount = st.text_input("Amount (₹)", placeholder="e.g. 260.5")
+        col3, col4 = st.columns([2, 2])
+        with col3:
+            added_by = st.selectbox("Added by", options=ROOMMATES)
+
+        month = st.selectbox("Month", options=months, index=datetime.now().month - 1)
+        year = st.selectbox("Year", options=years, index=0)
+        submitted = st.form_submit_button("Add expense")
+
+    if submitted:
+        if not source:
+            st.error("Please enter an expense source.")
+        elif not amount:
+            st.error("Please enter amount")
+        elif not added_by:
+            st.error("Please enter User info")
+        else:
+            try:
+                amt = float(amount)
+                # month_idx = months.index(month) + 1
+                add_expense_to_db(source.strip(), amt, users_dict.get(added_by), month, int(year))
+                st.success(f"Added: {source.strip()} — ₹{amt:.2f} — {added_by} — {month} {year}")
+                st.success(f"Please check Home Page for Expenses Info")
+            except ValueError:
+                st.error("Amount must be a number (use a dot for decimals).")
+
+elif expense_parser == ExpenseSource.IMAGE_UPLOAD.value:
+    # Image Uploader Form
+    image_uploaded = st.file_uploader("Upload expense screenshot", type=["jpg", "jpeg", "png"])
+    with st.form("image_expense_form", clear_on_submit=True):
+        col3, col4 = st.columns([2, 2])
+        with col3:
+            added_by = st.selectbox("Added by", options=ROOMMATES)
+
+        month = st.selectbox("Month", options=months, index=datetime.now().month - 1)
+        year = st.selectbox("Year", options=years, index=0)
+        submitted = st.form_submit_button("Add expense")
+    
+        if submitted:
+            try:
+                expenses_data = parse_expense_from_image(image_uploaded)
+                for expense in expenses_data:
+                    expense["month"] = month
+                    expense["year"] = year
+                    expense["added_by_id"] = users_dict.get(added_by)
+                    expense["created_at"] = datetime.utcnow()
+                    expense["updated_at"] = datetime.utcnow()
+                expenses_count = bulk_add_expense_to_db(expenses_data)
+                st.success(f"Expenses Added Successfully. Count Added: {expenses_count}")
+                st.success(f"Please check Home Page for Expenses Info")
+            except ValueError:
+                st.error("Expenses Addition via Image Failed")
