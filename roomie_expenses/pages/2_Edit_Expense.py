@@ -110,13 +110,11 @@ else:
                     is_expense_updated = update_expense_in_db(exp_id, payload)
                     if is_expense_updated:
                         st.success("Expense updated.")
-                        st.experimental_rerun()
                     else:
                         st.error("Failed to update expense (check server logs).")
 
                 if cancel:
                     st.query_params.pop("edit_expense", None)
-                    st.experimental_rerun()
 
         # close card div
         st.markdown("</div>", unsafe_allow_html=True)
