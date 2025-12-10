@@ -4,10 +4,10 @@ import streamlit as st
 from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
 from typing import Optional
 
-
 from db.helpers import load_user_totals, load_expenses, get_all_users
 from utils.constants import months, years
 from utils.styles import CARD_CSS
+
 
 # --- App ---
 st.set_page_config(page_title="Expenses — Dashboard", layout="wide")
