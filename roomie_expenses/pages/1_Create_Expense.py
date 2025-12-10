@@ -13,6 +13,15 @@ ROOMMATES, users_dict = get_all_users()
 
 path = os.path.join(base_dir, "sample_image.png")
 
+params = st.query_params
+
+params = st.query_params
+flash = params.get("flash")
+if flash:
+    print("flash")
+    st.success(flash)
+    st.query_params.pop("flash", None)
+
 # ---------- UI ----------
 st.title("🏠 Roommates — Add Expense")
 
@@ -47,7 +56,8 @@ if expense_parser == ExpenseSource.MANUAL_EXPENSE.value:
             try:
                 amt = float(amount)
                 add_expense_to_db(source.strip(), amt, users_dict.get(added_by), month, int(year))
-                st.success(f"Added: {source.strip()} — ₹{amt:.2f} — {added_by} — {month} {year}")
+                print(f"Added: {source.strip()} — ₹{amt:.2f} — {added_by} — {month} {year}")
+                st.query_params["flash"] = f"Added: {source.strip()} — ₹{amt:.2f} — {added_by} — {month} {year}"
                 st.success(f"Please check Home Page for Expenses Info")
             except ValueError:
                 st.error("Amount must be a number (use a dot for decimals).")
