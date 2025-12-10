@@ -107,9 +107,14 @@ def load_user_totals(selected_month: str = None, selected_year: int = None) -> p
 def load_expenses(user_id: int, month: str = None, year: int = None) -> pd.DataFrame:
     """Return all expenses as DataFrame. Replace demo with DB query."""
     user_expenses = []
-    expenses_query = (
-        session.query(Expense)
-    ).filter(Expense.added_by_id == int(user_id))
+    if user_id and user_id != 'All':
+        expenses_query = (
+            session.query(Expense)
+        ).filter(Expense.added_by_id == int(user_id))
+    else:
+        expenses_query = (
+            session.query(Expense)
+        )
 
     expenses_query = expenses_query.filter(Expense.month == month) if month and month != "All" else expenses_query
     expenses_query = expenses_query.filter(Expense.year == year) if year and year != "All" else expenses_query
@@ -128,6 +133,21 @@ def load_expenses(user_id: int, month: str = None, year: int = None) -> pd.DataF
         )
 
     return pd.DataFrame(user_expenses)
+
+def update_expense_in_db(expense_id: int, payload: dict):
+    """Edit the timings, priority, status or invitees of a Task"""
+    expense = (
+        session.query(Expense)
+        .filter_by(id=expense_id)
+        .first()
+    )
+
+    if expense:
+        expense.source_of_expense = payload["source_of_expense"]
+        expense.amount = payload["amount"]
+        session.commit()
+        session.close()
+        return expense_id
 
 
 # ---------- User Helper Functions ----------

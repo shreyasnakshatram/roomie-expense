@@ -31,7 +31,7 @@ user_totals = load_user_totals(selected_month, selected_year)
 # format totals for display
 user_totals = user_totals.sort_values("total_amount", ascending=False).reset_index(drop=True)
 user_totals["total_str"] = user_totals["total_amount"].map(lambda x: f"₹{x:,.2f}")
-user_totals["num_str"] = user_totals["num_expenses"].astype(str) + " items"
+user_totals["num_str"] = user_totals["num_expenses"].astype(str) + " expenses added"
 
 
 st.markdown(CARD_CSS, unsafe_allow_html=True)

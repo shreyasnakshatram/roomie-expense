@@ -1,16 +1,17 @@
+import os
 import streamlit as st
 
 from datetime import datetime
 from db.helpers import add_expense_to_db, bulk_add_expense_to_db, get_all_users
 
-from utils.constants import months, years
+from utils.constants import months, years, base_dir
 from utils.enums import ExpenseSource
 from utils.expense_helpers import parse_expense_from_image
 
 # ---------- CONFIG ----------
 ROOMMATES, users_dict = get_all_users()
 
-
+path = os.path.join(base_dir, "sample_image.png")
 
 # ---------- UI ----------
 st.title("🏠 Roommates — Add Expense")
@@ -53,6 +54,8 @@ if expense_parser == ExpenseSource.MANUAL_EXPENSE.value:
 
 elif expense_parser == ExpenseSource.IMAGE_UPLOAD.value:
     # Image Uploader Form
+    st.image(path, caption="Sample Format")
+
     image_uploaded = st.file_uploader("Upload expense screenshot", type=["jpg", "jpeg", "png"])
     with st.form("image_expense_form", clear_on_submit=True):
         col3, col4 = st.columns([2, 2])
