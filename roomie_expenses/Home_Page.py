@@ -11,10 +11,10 @@ from utils.styles import CARD_CSS
 
 # --- App ---
 st.set_page_config(page_title="Expenses — Dashboard", layout="wide")
-st.title("Expenses")
+st.title("Home Page - Expenses")
 
 # Month & Year Filters
-st.markdown("### Filters")
+st.markdown("## Filters")
 
 month_options = months
 year_options = years
