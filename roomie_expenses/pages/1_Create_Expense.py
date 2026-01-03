@@ -47,9 +47,15 @@ if expense_parser == ExpenseSource.MANUAL_EXPENSE.value:
             try:
                 amt = float(amount)
                 add_expense_to_db(source.strip(), amt, users_dict.get(added_by), month, int(year))
-                st.success(f"Please check Home Page for Expenses Info")
+                st.session_state["expense_success"] = "✅ Expense added successfully. Please check Home Page."
             except ValueError:
                 st.error("Amount must be a number (use a dot for decimals).")
+
+    if "added_expense" in st.session_state:
+        st.success(st.session_state["added_expense"])
+
+    if "expense_success" in st.session_state:
+        st.success(st.session_state["expense_success"])
 
 elif expense_parser == ExpenseSource.IMAGE_UPLOAD.value:
     # Image Uploader Form
@@ -65,16 +71,22 @@ elif expense_parser == ExpenseSource.IMAGE_UPLOAD.value:
         year = st.selectbox("Year", options=years, index=0)
         submitted = st.form_submit_button("Add expense")
     
-        if submitted:
-            try:
-                expenses_data = parse_expense_from_image(image_uploaded)
-                for expense in expenses_data:
-                    expense["month"] = month
-                    expense["year"] = year
-                    expense["added_by_id"] = users_dict.get(added_by)
-                    expense["created_at"] = datetime.utcnow()
-                    expense["updated_at"] = datetime.utcnow()
-                expenses_count = bulk_add_expense_to_db(expenses_data)
-                st.success(f"Please check Home Page for Expenses Info")
-            except ValueError:
-                st.error("Expenses Addition via Image Failed")
+    if submitted:
+        try:
+            expenses_data = parse_expense_from_image(image_uploaded)
+            for expense in expenses_data:
+                expense["month"] = month
+                expense["year"] = year
+                expense["added_by_id"] = users_dict.get(added_by)
+                expense["created_at"] = datetime.utcnow()
+                expense["updated_at"] = datetime.utcnow()
+            expenses_count = bulk_add_expense_to_db(expenses_data)
+            st.session_state["bulk_expense_success"] = f"Please check Home Page for Expenses Info"
+        except ValueError:
+            st.error("Expenses Addition via Image Failed")
+
+    if "bulk_add_expenses" in st.session_state:
+        st.success(st.session_state["bulk_add_expenses"])
+
+    if "bulk_expense_success" in st.session_state:
+        st.success(st.session_state["bulk_expense_success"])
