@@ -1,5 +1,6 @@
 import os
 import streamlit as st
+import time
 
 from datetime import datetime
 from db.helpers import add_expense_to_db, bulk_add_expense_to_db, get_all_users
@@ -46,10 +47,8 @@ if expense_parser == ExpenseSource.MANUAL_EXPENSE.value:
         else:
             try:
                 amt = float(amount)
-                message = f"✅ Added: {source.strip()} — ₹{amt:.2f} ({month} {year})"
-                st.toast(message)
-                st.toast("Get Here 1")
                 add_expense_to_db(source.strip(), amt, users_dict.get(added_by), month, int(year))
+                time.sleep(1.8)
             except ValueError as e:
                 st.toast(str(e))
 
@@ -77,12 +76,7 @@ elif expense_parser == ExpenseSource.IMAGE_UPLOAD.value:
                 expense["created_at"] = datetime.utcnow()
                 expense["updated_at"] = datetime.utcnow()
             expenses_count = bulk_add_expense_to_db(expenses_data)
-            st.session_state["bulk_expense_success"] = f"Please check Home Page for Expenses Info"
+            time.sleep(1.8)
         except ValueError:
             st.error("Expenses Addition via Image Failed")
 
-    if "bulk_add_expenses" in st.session_state:
-        st.success(st.session_state["bulk_add_expenses"])
-
-    if "bulk_expense_success" in st.session_state:
-        st.success(st.session_state["bulk_expense_success"])
