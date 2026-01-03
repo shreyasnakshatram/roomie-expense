@@ -83,8 +83,12 @@ elif expense_parser == ExpenseSource.IMAGE_UPLOAD.value:
                 expense["added_by_id"] = users_dict.get(added_by)
                 expense["created_at"] = datetime.utcnow()
                 expense["updated_at"] = datetime.utcnow()
-            expenses_count = bulk_add_expense_to_db(expenses_data)
-            time.sleep(1.8)
+
+            message = f"Expenses Added Successfully! Count: {len(expenses_data)}"
+            st.toast(message)
+            time.sleep(1.4)
+            with get_db_session() as session:
+                count = bulk_add_expense_to_db(session, expenses_data)
         except ValueError:
             st.error("Expenses Addition via Image Failed")
 
