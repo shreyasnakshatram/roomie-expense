@@ -1,15 +1,21 @@
 import os
 import streamlit as st
+import time
 
 from datetime import datetime
-from db.helpers import add_expense_to_db, bulk_add_expense_to_db, get_all_users
+from db.helpers import add_expense_to_db, bulk_add_expense_to_db, get_all_users, get_db_session
 
 from utils.constants import months, years, base_dir
 from utils.enums import ExpenseSource
 from utils.expense_helpers import parse_expense_from_image
 
 # ---------- CONFIG ----------
-ROOMMATES, users_dict = get_all_users()
+@st.cache_data
+def load_users():
+    return get_all_users()
+
+ROOMMATES, users_dict = load_users()
+# ROOMMATES, users_dict = get_all_users()
 
 path = os.path.join(base_dir, "sample_image.png")
 
@@ -48,8 +54,9 @@ if expense_parser == ExpenseSource.MANUAL_EXPENSE.value:
                 amt = float(amount)
                 message = f"✅ Added: {source.strip()} — ₹{amt:.2f} ({month} {year})"
                 st.toast(message)
-                st.toast("Get Here 1")
-                add_expense_to_db(source.strip(), amt, users_dict.get(added_by), month, int(year))
+                time.sleep(1.4)
+                with get_db_session() as session:
+                    add_expense_to_db(source.strip(), amt, users_dict.get(added_by), month, int(year))
             except ValueError as e:
                 st.toast(str(e))
 
@@ -76,13 +83,11 @@ elif expense_parser == ExpenseSource.IMAGE_UPLOAD.value:
                 expense["added_by_id"] = users_dict.get(added_by)
                 expense["created_at"] = datetime.utcnow()
                 expense["updated_at"] = datetime.utcnow()
-            expenses_count = bulk_add_expense_to_db(expenses_data)
-            st.session_state["bulk_expense_success"] = f"Please check Home Page for Expenses Info"
+
+            message = f"Expenses Added Successfully! Count: {len(expenses_data)}"
+            st.toast(message)
+            time.sleep(1.4)
+            with get_db_session() as session:
+                count = bulk_add_expense_to_db(session, expenses_data)
         except ValueError:
             st.error("Expenses Addition via Image Failed")
-
-    if "bulk_add_expenses" in st.session_state:
-        st.success(st.session_state["bulk_add_expenses"])
-
-    if "bulk_expense_success" in st.session_state:
-        st.success(st.session_state["bulk_expense_success"])
