@@ -59,6 +59,7 @@ def add_expense_to_db(source: str, amount: float, added_by: int, month: str, yea
     )
 
     session.add(new_expense)
+    st.toast(f"✅ Added: {source.strip()} — ₹{amount:.2f} ({month} {year})")
     session.commit()
     expense_id = new_expense.id
     session.close()
