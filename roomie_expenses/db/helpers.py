@@ -32,10 +32,10 @@ def get_db_session():
 def bulk_add_expense_to_db(expenses_data: list) -> int:
     try:
         objs = [Expense(**rec) for rec in expenses_data]
+        message = f"Expenses Added Successfully. Count Added: {len(objs)}"
+        st.toast(message)
         session.add_all(objs)
         session.commit()
-
-        st.session_state["bulk_add_expenses"] = f"Expenses Added Successfully. Count Added: {len(objs)}"
 
         return len(objs)
 
@@ -61,7 +61,6 @@ def add_expense_to_db(source: str, amount: float, added_by: int, month: str, yea
     session.add(new_expense)
     message = f"✅ Added: {source.strip()} — ₹{amount:.2f} ({month} {year})"
     st.toast(message)
-    st.toast("Get Here 2")
     session.commit()
     expense_id = new_expense.id
     session.close()
