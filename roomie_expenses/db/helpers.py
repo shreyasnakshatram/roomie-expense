@@ -35,7 +35,7 @@ def bulk_add_expense_to_db(expenses_data: list) -> int:
         session.add_all(objs)
         session.commit()
 
-        st.success(f"Expenses Added Successfully. Count Added: {len(objs)}")
+        st.session_state["bulk_add_expenses"] = f"Expenses Added Successfully. Count Added: {len(objs)}"
 
         return len(objs)
 
@@ -62,7 +62,7 @@ def add_expense_to_db(source: str, amount: float, added_by: int, month: str, yea
     session.commit()
     expense_id = new_expense.id
     session.close()
-    st.success(f"Added: {source.strip()} — ₹{amount:.2f} — {month} {year}")
+    st.session_state["added_expense"] = f"Added: {source.strip()} — ₹{amount:.2f} — {month} {year}"
 
     return expense_id
 
