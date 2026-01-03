@@ -26,8 +26,6 @@ def get_db_session():
     except Exception as e:
         session.rollback()
         raise e
-    finally:
-        session.close()
 
 def bulk_add_expense_to_db(expenses_data: list) -> int:
     try:
