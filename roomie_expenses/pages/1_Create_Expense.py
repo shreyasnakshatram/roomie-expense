@@ -13,9 +13,6 @@ ROOMMATES, users_dict = get_all_users()
 
 path = os.path.join(base_dir, "sample_image.png")
 
-if "expense_success" not in st.session_state:
-    st.session_state.expense_success = None
-
 # ---------- UI ----------
 st.title("🏠 Roommates — Add Expense")
 
@@ -50,17 +47,10 @@ if expense_parser == ExpenseSource.MANUAL_EXPENSE.value:
             try:
                 amt = float(amount)
                 add_expense_to_db(source.strip(), amt, users_dict.get(added_by), month, int(year))
-                # st.session_state["expense_success"] = "✅ Expense added successfully. Please check Home Page."
-                st.session_state.expense_success = (
-                    f"✅ Added: {source.strip()} — ₹{amt:.2f} ({month} {year})"
-                )
-                st.rerun()
-            except ValueError as e:
-                st.error(str(e))
-                st.error("Amount must be a number (use a dot for decimals).")
+                st.toast(f"✅ Added: {source.strip()} — ₹{amt:.2f} ({month} {year})")
 
-    if st.session_state.expense_success:
-        st.success(st.session_state.expense_success)
+            except ValueError as e:
+                st.toast(str(e))
 
 elif expense_parser == ExpenseSource.IMAGE_UPLOAD.value:
     # Image Uploader Form
