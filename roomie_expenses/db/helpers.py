@@ -26,25 +26,13 @@ def get_db_session():
     except Exception as e:
         session.rollback()
         raise e
-    finally:
-        session.close()
 
-def bulk_add_expense_to_db(expenses_data: list) -> int:
-    try:
-        objs = [Expense(**rec) for rec in expenses_data]
-        session.add_all(objs)
-        session.commit()
+def bulk_add_expense_to_db(session, expenses_data: list) -> int:
+    objs = [Expense(**rec) for rec in expenses_data]
+    session.add_all(objs)
+    session.flush()
 
-        st.session_state["bulk_add_expenses"] = f"Expenses Added Successfully. Count Added: {len(objs)}"
-
-        return len(objs)
-
-    except SQLAlchemyError:
-        session.rollback()
-
-    finally:
-        session.close()
-    return 0
+    return len(objs)
 
 
 def add_expense_to_db(source: str, amount: float, added_by: int, month: str, year: int):
@@ -59,12 +47,9 @@ def add_expense_to_db(source: str, amount: float, added_by: int, month: str, yea
     )
 
     session.add(new_expense)
-    session.commit()
-    expense_id = new_expense.id
-    session.close()
-    st.session_state["added_expense"] = f"Added: {source.strip()} — ₹{amount:.2f} — {month} {year}"
+    session.flush()
 
-    return expense_id
+    return new_expense.id
 
 
 def load_user_totals(selected_month: str = None, selected_year: int = None) -> pd.DataFrame:
