@@ -27,22 +27,12 @@ def get_db_session():
         session.rollback()
         raise e
 
-def bulk_add_expense_to_db(expenses_data: list) -> int:
-    try:
-        objs = [Expense(**rec) for rec in expenses_data]
-        message = f"Expenses Added Successfully. Count Added: {len(objs)}"
-        st.toast(message)
-        session.add_all(objs)
-        session.commit()
+def bulk_add_expense_to_db(session, expenses_data: list) -> int:
+    objs = [Expense(**rec) for rec in expenses_data]
+    session.add_all(objs)
+    session.flush()
 
-        return len(objs)
-
-    except SQLAlchemyError:
-        session.rollback()
-
-    finally:
-        session.close()
-    return 0
+    return len(objs)
 
 
 def add_expense_to_db(source: str, amount: float, added_by: int, month: str, year: int):
