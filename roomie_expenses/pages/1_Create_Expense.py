@@ -3,7 +3,7 @@ import streamlit as st
 import time
 
 from datetime import datetime
-from db.helpers import add_expense_to_db, bulk_add_expense_to_db, get_all_users
+from db.helpers import add_expense_to_db, bulk_add_expense_to_db, get_all_users, get_db_session
 
 from utils.constants import months, years, base_dir
 from utils.enums import ExpenseSource
@@ -47,8 +47,11 @@ if expense_parser == ExpenseSource.MANUAL_EXPENSE.value:
         else:
             try:
                 amt = float(amount)
-                add_expense_to_db(source.strip(), amt, users_dict.get(added_by), month, int(year))
-                time.sleep(1.8)
+                message = f"✅ Added: {source.strip()} — ₹{amt:.2f} ({month} {year})"
+                st.toast(message)
+                time.sleep(1.4)
+                with get_db_session() as session:
+                    add_expense_to_db(source.strip(), amt, users_dict.get(added_by), month, int(year))
             except ValueError as e:
                 st.toast(str(e))
 
